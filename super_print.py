@@ -30,8 +30,16 @@ class SuperPrint:
         self.target_name = target_name
         self.divider_symbol = divider_symbol
         self.mark_symbol = mark_symbol
-        self.terminal_size = os.get_terminal_size(0)[0]
+        self.terminal_size = self._get_console_width()
         self._run()
+
+    @staticmethod
+    def _get_console_width():
+        try:
+            console_width = os.get_terminal_size(0)[0]
+        except:
+            console_width = 76
+        return console_width
 
     def _target_info(self):
         if self.mark_symbol and self.target_name:
