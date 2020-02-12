@@ -30,13 +30,12 @@ class ProgressBar:
     def validate(self):
         if not isinstance(self.count, int):
             raise Exception(
-                f'[ERROR     ]| Invalid type of "count": {self.count} {type(self.count)}')
+                f'[{"ERROR":10}]| Invalid type of "count": {self.count} {type(self.count)}')
         if not isinstance(self.amount, int):
             raise Exception(
-                f'[ERROR     ]| Invalid type of "amount": {self.amount} {type(self.amount)}')
+                f'[{"ERROR":10}]| Invalid type of "amount": {self.amount} {type(self.amount)}')
         if self.count > self.amount:
-            raise Exception(
-                f'[ERROR     ]| "count" is greater than "amount": {self.count} > {self.amount}')
+            print(f'[{"WARNING":10}]| "count" is greater than "amount": {self.count} > {self.amount}')
 
     @staticmethod
     def _get_console_width():
