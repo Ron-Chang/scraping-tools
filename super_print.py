@@ -25,7 +25,7 @@ class SuperPrint:
             |* test: [1, 2, 3, 4, 5, 6]                             |
             |-------------------------------------------------------|
     """
-    def __init__(self, target, target_name=None, divider_symbol='-', mark_symbol=None):
+    def __init__(self, target, target_name=None, mark_symbol=None, divider_symbol='-'):
         self.target = target
         self.target_name = target_name
         self.divider_symbol = divider_symbol
