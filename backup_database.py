@@ -123,8 +123,7 @@ class BackupDatabase:
 
     def _exec(self):
         """
-            直接備份至 submodule('spyder_initial_data/data/') 之下,
-            改變備份資料,手動從指定日期資料夾取出覆蓋外部 'primary_db', 'secondary_db' and 'tertiary_db'
+            備份至 'static/backup/') 之下,
             資料夾格式 'backup_%Y_%m_%dT%H_%M_%S' -> 'backup_2020_02_18T17_28_54'
         """
         tables = self._get_tables()
