@@ -10,7 +10,6 @@ from scraping_tools.snap_timer import SnapTimer
 from scraping_tools.log_stash import LogStash
 from scraping_tools.utils import Utils, DecoratorUtils
 # project
-from core import models
 from config import Config
 
 
