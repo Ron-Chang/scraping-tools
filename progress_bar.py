@@ -3,28 +3,26 @@ import os
 
 class ProgressBar:
     """
-        :info: only display the first 10 letters.
-        :description: only display the first 20 letters.
-    """
-    RESERVED_ROOM = 10
+        ProgressBar(count, amount, info=None, desc=None)
 
-    def __init__(self,
-            count, amount,
-            info=None, description=None,
-            bar_fg_unit='#', bar_bg_unit='_'
-        ):
+        :info: only display the first 10 letters.
+        :desc: abbreviation for description.
+    """
+    _RESERVED_ROOM = 0
+    _BAR_FG_UNIT = '🁢'
+    _BAR_BG_UNIT = '🁣'
+    _BAR_LENGTH = 15
+
+    def __init__(self, count, amount, info=None, desc=None):
         self.count = count
         self.amount = amount
         self.info = info
-        self.description = description
-        self.bar_fg_unit = bar_fg_unit
-        self.bar_bg_unit = bar_bg_unit
+        self.desc = desc
 
         self.validate()
 
-        self.proceed_percentage = self._get_proceed_percentage()
-        self.display_info = self._get_display_info()
-        self.progress_bar_length = self._get_progress_bar_length()
+        self.proceed_rate = self._get_proceed_rate()
+
         self._run()
 
     def validate(self):
@@ -45,51 +43,53 @@ class ProgressBar:
             console_width = 76
         return console_width
 
-    def _get_progress_bar_length(self):
-        return self._get_console_width() - len(self.display_info) - self.RESERVED_ROOM
+    def _get_desc_length(self, bar, info, rate):
+        bar_info_rate_length = len(bar) + len(info) + len(rate)
+        desc_length = self._get_console_width() - bar_info_rate_length - self._RESERVED_ROOM
+        return 0 if desc_length < 0 else desc_length
 
-    def _get_proceed_percentage(self):
+    def _get_proceed_rate(self):
+        """
+            self.amount 若小於 0 rate 或 self.count 大於 self.amount
+            視作 100
+        """
+        if self.amount <= 0 or self.count > self.amount:
+            return 100
         return self.count / self.amount * 100
 
     def _get_progress_bar(self):
-        fg_length = int(self.progress_bar_length * self.proceed_percentage / 100)
-        bg_length = self.progress_bar_length - fg_length
-        bar_fg = self.bar_fg_unit * fg_length
-        bar_bg = self.bar_bg_unit * bg_length
-        return bar_fg + bar_bg
+        if self.proceed_rate > 100:
+            return f'|{self._BAR_FG_UNIT * self._BAR_LENGTH}| '
+        fg_length = int(self._BAR_LENGTH * self.proceed_rate / 100)
+        bg_length = self._BAR_LENGTH - fg_length
+        return f'|{self._BAR_FG_UNIT * fg_length}{self._BAR_BG_UNIT * bg_length}| '
 
-    def _get_formated_info(self):
-        if self.info is None:
-            info = 'INFO'
-        else:
-            info = self.info[:10]
-        return f'[{info:<10}]| '
+    def _get_formatted_info(self):
 
-    def _get_formated_description(self):
-        if self.description is None:
-            return f'{self.count:,} of {self.amount:,} | '
-        else:
-            return f'[{self.description[:20]:<20}]| '
+        info = self.info.upper() if self.info else 'INFO'
+        return f'[{info[:10]:<10}]| '
 
-    def _get_formated_proceed_percentage(self):
-        return f'[{self.proceed_percentage:>6,.2f}%] '
+    def _get_formatted_desc(self, desc_length):
+        desc = self.desc or f' {self.count:,} of {self.amount:,}'
+        return f'{desc[:desc_length]:<{desc_length}}'
 
-    def _get_display_info(self):
-        info = self._get_formated_info()
-        description = self._get_formated_description()
-        proceed_percentage = self._get_formated_proceed_percentage()
-        return info + description + proceed_percentage
+    def _get_formatted_rate(self):
+        return f'[{self.proceed_rate:>6,.2f}%]'
 
     def _run(self):
-        progress_bar = self._get_progress_bar()
-        if not self.proceed_percentage == 100:
-            print(f'{self.display_info}|{progress_bar}|', end='\r', flush=True)
-        else:
-            print(f'{self.display_info}|{progress_bar}|' + ' DONE!')
+        bar = self._get_progress_bar()
+        info = self._get_formatted_info()
+        rate = self._get_formatted_rate()
+        desc = self._get_formatted_desc(desc_length=self._get_desc_length(bar, info, rate))
+        print(f'\r{info}{rate}{bar}{desc}', end='', flush=True)
+        if self.proceed_rate == 100:
+            print('')
 
 if __name__ == '__main__':
     import time
-    print('[Example]\n')
-    for i in range(1,123+1):
-        ProgressBar(count=i, amount=123)
-        time.sleep(0.2)
+    amount = 147
+    demo = '[THIS IS A DEMONSTRATION]'
+    for count in range(1, amount+1):
+        desc = f'{demo} | {count} of {amount}'
+        ProgressBar(count=count, amount=amount, desc=desc, info='test')
+        time.sleep(0.01)
