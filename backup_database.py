@@ -7,19 +7,16 @@ from flask_sqlalchemy import DefaultMeta
 from scraping_tools.super_print import SuperPrint
 from scraping_tools.progress_bar import ProgressBar
 from scraping_tools.snap_timer import SnapTimer
-from scraping_tools.log_stash import LogStash
-from scraping_tools.utils import Utils, DecoratorUtils
-# project
-from config import Config
+from scraping_tools.utils import Utils
 
 
 class BackupDatabase:
 
-    def __init__(self, models, now, backup_dir):
+    def __init__(self, models, models_name, now, path):
         self.models = models
+        self.models_name = models_name
         self.now = now
-        self.backup_dir = backup_dir
-        self.models_name = Config.DB_NAME
+        self.path = path
 
         self._run()
 
@@ -92,7 +89,7 @@ class BackupDatabase:
 
     def _get_backup_path(self):
         format_datetime = self._get_format_datetime(datetime_=self.now)
-        return os.path.join(self.backup_dir, format_datetime, self.models_name)
+        return os.path.join(self.path, format_datetime, self.models_name)
 
     @staticmethod
     def _make_directories(path):
@@ -120,7 +117,7 @@ class BackupDatabase:
                 count += 1
                 ProgressBar(count=count, amount=amount, info='EXPORT >>', description=f'{table_name}')
 
-    def _exec(self):
+    def _run(self):
         """
             備份至 'static/backup/') 之下,
             資料夾格式 'backup_%Y_%m_%dT%H_%M_%S' -> 'backup_2020_02_18T17_28_54'
@@ -135,13 +132,3 @@ class BackupDatabase:
                 continue
             table_name = Utils.camel_to_underscore(letters=table_name_camel)
             self._export(table_name=table_name, backup_path=backup_path, table_list=table_list)
-
-    @DecoratorUtils.snap_interval(days=14)
-    def _run(self, snap_interval):
-            while True:
-                start = time.time()
-                try:
-                    self._exec()
-                except Exception as e:
-                    LogStash.error(e)
-                SnapTimer(snap_interval=snap_interval, start=start)
