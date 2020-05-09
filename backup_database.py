@@ -73,7 +73,7 @@ class BackupDatabase:
         for data in data_list:
             results.append({name: getattr(data, name) for name in column_names})
             count += 1
-            ProgressBar(count=count, amount=amount, info='<< BACKUP', description=f'{table_name_camel}')
+            ProgressBar(count=count, amount=amount, info='<< BACKUP', desc=f'{table_name_camel}')
         return results
 
     def _get_tables(self):
@@ -84,7 +84,7 @@ class BackupDatabase:
         return tables
 
     @staticmethod
-    def _get_format_datetime(datetime_, format_='backup_%Y_%m_%dT%H_%M_%S'):
+    def _get_format_datetime(datetime_, format_='backup_%Y_%m_%dT%H_%M'):
         return datetime_.strftime(format_)
 
     def _get_backup_path(self):
@@ -115,7 +115,13 @@ class BackupDatabase:
                         data.update({key: 'NULL'})
                 writer.writerow(data)
                 count += 1
-                ProgressBar(count=count, amount=amount, info='EXPORT >>', description=f'{table_name}')
+                ProgressBar(count=count, amount=amount, info='EXPORT >>', desc=f'{table_name}')
+
+    @staticmethod
+    def _is_empty(path):
+        if not os.listdir(path=path):
+            return True
+        return False
 
     def _run(self):
         """
@@ -125,10 +131,13 @@ class BackupDatabase:
         tables = self._get_tables()
         backup_path = self._get_backup_path()
         self._make_directories(path=backup_path)
-
         for table_name_camel, table in tables.items():
             table_list = self._convert_table_to_list(table_name_camel=table_name_camel, table=table)
             if not table_list:
                 continue
             table_name = Utils.camel_to_underscore(letters=table_name_camel)
             self._export(table_name=table_name, backup_path=backup_path, table_list=table_list)
+        if os.path.exists(path=backup_path) and self._is_empty(path=backup_path):
+            os.removedirs(name=backup_path)
+            print(f'Removed empty backup directory {backup_path}')
+
