@@ -1,12 +1,9 @@
 # built-in
-import os, csv, inspect, time, subprocess
-from datetime import datetime, timedelta
+import os, csv, inspect
 # 3rd-party
 from flask_sqlalchemy import DefaultMeta
 # submodule
-from scraping_tools.super_print import SuperPrint
 from scraping_tools.progress_bar import ProgressBar
-from scraping_tools.snap_timer import SnapTimer
 from scraping_tools.utils import Utils
 
 
@@ -38,9 +35,9 @@ class BackupDatabase:
 
     @classmethod
     def _slice_query(cls, table, table_name_camel, slice_length=2000):
-        '''
+        """
             切片迭代資料庫
-        '''
+        """
         count = 0
         data_list = list()
         while True:
@@ -51,16 +48,16 @@ class BackupDatabase:
             ).all()
             if not _slice:
                 print(f'[SLICE     ]| {table_name_camel[:20]:21}| {(count + 1):11} Times '
-                f'{(slice_length * count):,} Qty.')
+                      f'{(slice_length * count):,} Qty.')
                 break
             data_list.extend([data for data in _slice])
             if len(_slice) < slice_length:
                 print(f'[SLICE     ]| {table_name_camel[:20]:21}| {(count + 1):11} Times '
-                    f'{(slice_length * count + len(_slice)):,} Qty.')
+                      f'{(slice_length * count + len(_slice)):,} Qty.')
                 break
             count += 1
             print(f'[SLICE     ]| {table_name_camel[:20]:21}| {(count + 1):11} Times '
-                f'{(slice_length * count):,} Qty.', end='\r', flush=True)
+                  f'{(slice_length * count):,} Qty.', end='\r', flush=True)
         return data_list
 
     @classmethod

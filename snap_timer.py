@@ -20,7 +20,8 @@ class SnapTimer:
     def _print_divider(self):
         print('=' * self.terminal_size)
 
-    def _fmt_datetime(self, timedelta_=None ,datetime_=None):
+    @staticmethod
+    def _fmt_datetime(timedelta_=None, datetime_=None):
         format_ = '%Y-%m-%d %H:%M:%S,%f'
         if datetime_ and timedelta_:
             return (datetime_ + timedelta_).strftime(format_)[:-3]

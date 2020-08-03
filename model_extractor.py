@@ -41,7 +41,7 @@ class ModelExtractor:
 
         self._run()
 
-        self.quantity = len(self.objects)
+        self.quantity = len(self.objects) if self.objects else None
 
     @staticmethod
     def get_tables(models):
@@ -121,11 +121,10 @@ class ModelExtractor:
         return container
 
     def _get_data(self):
-        if split_by > 1:
+        if self.split_by > 1:
             self._split_objects()
         return [{column: getattr(obj, column) for column in self.columns} for obj in self.objects]
 
-    @classmethod
     def _run(self):
         self.columns = self._get_columns()
         self.objects = self._slice_query()
